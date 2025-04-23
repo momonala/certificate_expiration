@@ -1,0 +1,22 @@
+# local testing files
+/cache
+/tmp
+/prototyping
+
+# code generated/large files
+*.db
+*.ipynb
+*.mp4
+*.csv
+
+# OS generated
+.DS_Store
+.idea/
+.ipynb_checkpoints/
+__pycache__/
+joblib_cache/
+
+# secrets
+google_application_credentials.json
+values.py
+app_calendar_events.json
