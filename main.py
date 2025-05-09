@@ -1,7 +1,8 @@
 import logging
 import re
-from datetime import UTC, datetime
+from datetime import datetime
 from glob import glob
+from zoneinfo import ZoneInfo
 
 import requests
 
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 telegrap_api_uri = f'https://api.telegram.org/bot{telegram_api_token}/sendMessage'
 
 certs = glob("/Users/mnalavadi/Library/Developer/Xcode/UserData/Provisioning Profiles/*mobileprovision")
+BERLIN_TZ = ZoneInfo("Europe/Berlin")
 
 
 def extract_app_name(_certificate: str) -> tuple[str, datetime]:
@@ -26,20 +28,21 @@ def extract_app_name(_certificate: str) -> tuple[str, datetime]:
         print(f"ERROR: Could not find app name in: {line_with_app_name}")
         return None, None
     app_name = match.group(1)
-    if "test" in app_name.lower():
+    if "test" in app_name.lower() or "widget" in app_name.lower():
         return None, None
 
     date_string = [x for x in _certificate if b"date" in x][1].decode("utf-8")
     date_time_str = date_string.split('<date>')[1].split('</date>')[0]
-    expiration_date = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=UTC)
+    # Convert UTC to Berlin time
+    expiration_date = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=ZoneInfo("UTC")).astimezone(BERLIN_TZ)
 
     return app_name, expiration_date
 
 
 def send_telegram_message(app_name: str, expiration_date: datetime):
-    formatted_expiriation = expiration_date.strftime("%a %d %b at %H:%M")
+    formatted_expiriation = expiration_date.strftime("%a %d %b at %H:%M %Z")
 
-    current_datetime = datetime.now(UTC)
+    current_datetime = datetime.now(BERLIN_TZ)
     time_difference = expiration_date - current_datetime
     days = time_difference.days
     hours, remainder = divmod(time_difference.seconds, 3600)

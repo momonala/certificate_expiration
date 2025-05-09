@@ -5,6 +5,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -17,6 +18,7 @@ EVENT_TRACKING_FILE = SCRIPT_DIR / "app_calendar_events.json"
 SERVICE_ACCOUNT_FILE = SCRIPT_DIR / "google_application_credentials.json"
 CALENDAR_ID = "mnalavadi@gmail.com"
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
+BERLIN_TZ = ZoneInfo("Europe/Berlin")
 credentials = service_account.Credentials.from_service_account_file(str(SERVICE_ACCOUNT_FILE), scopes=SCOPES)
 
 
@@ -59,11 +61,13 @@ def create_or_update_calendar_event(app_info: AppCertInfo, event_id: str | None 
         ),
         "start": {
             "date": event_date.isoformat(),  # All-day event uses date instead of dateTime
+            "timeZone": str(BERLIN_TZ),
         },
         "end": {
             "date": (
                 event_date + timedelta(days=1)
             ).isoformat(),  # All-day event needs end date to be next day
+            "timeZone": str(BERLIN_TZ),
         },
         "colorId": "11",  # Red color in Google Calendar
         "reminders": {
