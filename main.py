@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 telegrap_api_uri = f'https://api.telegram.org/bot{telegram_api_token}/sendMessage'
 
 certs = glob("/Users/mnalavadi/Library/Developer/Xcode/UserData/Provisioning Profiles/*mobileprovision")
+certs = glob("/Users/mohit/Library/Developer/Xcode/UserData/Provisioning Profiles/*mobileprovision")
 BERLIN_TZ = ZoneInfo("Europe/Berlin")
 
 
