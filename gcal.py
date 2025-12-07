@@ -3,13 +3,16 @@
 import json
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+from rich.console import Console
 
+console = Console()
 logger = logging.getLogger(__name__)
 
 # Get the directory where this script is located
@@ -82,12 +85,12 @@ def create_or_update_calendar_event(app_info: AppCertInfo, event_id: str | None 
     try:
         if event_id:
             result = gcal_client.update(calendarId=CALENDAR_ID, eventId=event_id, body=event).execute()
-            logger.info(f"📅 Updated calendar event for {app_info.app_name}")
+            console.print(f"  [green]✓[/green] [dim]Updated calendar event[/dim]")
         else:
             result = gcal_client.insert(calendarId=CALENDAR_ID, body=event).execute()
-            logger.info(f"📅 Created calendar event for {app_info.app_name}")
+            console.print(f"  [green]✓[/green] [dim]Created calendar event[/dim]")
 
         return result["id"]
     except Exception as e:
-        logger.error(f"Failed to create/update calendar event for {app_info.app_name}: {e}")
+        console.print(f"  [red]✗[/red] [dim]Failed to sync calendar event: {e}[/dim]")
         return None

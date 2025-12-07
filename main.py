@@ -5,12 +5,29 @@ from glob import glob
 from zoneinfo import ZoneInfo
 
 import requests
+from rich import box
+from rich.console import Console
+from rich.logging import RichHandler
+from rich.panel import Panel
+from rich.text import Text
 
-from gcal import (AppCertInfo, create_or_update_calendar_event, load_event_ids,
-                  save_event_ids)
-from values import telegram_api_token, telegram_chat_id
+from gcal import AppCertInfo
+from gcal import create_or_update_calendar_event
+from gcal import load_event_ids
+from gcal import save_event_ids
+from values import telegram_api_token
+from values import telegram_chat_id
+
+# Setup rich console and logging
+console = Console()
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(console=console, rich_tracebacks=True, show_path=False)],
+)
 logger = logging.getLogger(__name__)
-telegrap_api_uri = f'https://api.telegram.org/bot{telegram_api_token}/sendMessage'
+telegrap_api_uri = f"https://api.telegram.org/bot{telegram_api_token}/sendMessage"
 
 certs = glob("/Users/mnalavadi/Library/Developer/Xcode/UserData/Provisioning Profiles/*mobileprovision")
 certs = glob("/Users/mohit/Library/Developer/Xcode/UserData/Provisioning Profiles/*mobileprovision")
@@ -23,19 +40,23 @@ def extract_app_name(_certificate: str) -> tuple[str, datetime]:
     identifier = "XC mnalavadi "
     lines = [x.decode("utf-8") for x in _certificate[4:7]]
     line_with_app_name = [x for x in lines if identifier in x][0]
-    pattern = fr'<string>{identifier}(.*?)</string>'
+    pattern = rf"<string>{identifier}(.*?)</string>"
     match = re.search(pattern, line_with_app_name)
     if not match:
-        print(f"ERROR: Could not find app name in: {line_with_app_name}")
+        console.print(f"[bold red]✗ ERROR:[/bold red] Could not find app name in: {line_with_app_name}")
         return None, None
     app_name = match.group(1)
     if "test" in app_name.lower() or "widget" in app_name.lower():
         return None, None
 
     date_string = [x for x in _certificate if b"date" in x][1].decode("utf-8")
-    date_time_str = date_string.split('<date>')[1].split('</date>')[0]
+    date_time_str = date_string.split("<date>")[1].split("</date>")[0]
     # Convert UTC to Berlin time
-    expiration_date = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=ZoneInfo("UTC")).astimezone(BERLIN_TZ)
+    expiration_date = (
+        datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M:%SZ")
+        .replace(tzinfo=ZoneInfo("UTC"))
+        .astimezone(BERLIN_TZ)
+    )
 
     return app_name, expiration_date
 
@@ -49,19 +70,58 @@ def send_telegram_message(app_name: str, expiration_date: datetime):
     hours, remainder = divmod(time_difference.seconds, 3600)
     minutes, _ = divmod(remainder, 60)
 
-    l1 = f"Expiration Date: {formatted_expiriation}"
-    l2 = f'Expires in: {days}d {hours}h {minutes}m'
-    telegram_msg = f"{app_name}\n{l1}\n{l2}"
-    print(telegram_msg, "\n")
+    # Determine urgency color based on days remaining
+    if days < 1:
+        urgency_color = "red"
+        urgency_icon = "🚨"
+    elif days < 2:
+        urgency_color = "yellow"
+        urgency_icon = "⚠️"
+    else:
+        urgency_color = "green"
+        urgency_icon = "✅"
 
-    json = {'chat_id': telegram_chat_id, 'text': f"```---{telegram_msg}```", 'parse_mode': 'Markdown'}
+    l1 = f"Expiration Date: {formatted_expiriation}"
+    l2 = f"Expires in: {days}d {hours}h {minutes}m"
+    telegram_msg = f"{app_name}\n{l1}\n{l2}"
+
+    # Create a rich panel for display
+    content = Text()
+    content.append(f"📅 Expiration: ", style="bold")
+    content.append(f"{formatted_expiriation}\n", style="cyan")
+    content.append(f"{urgency_icon} Expires in: ", style="bold")
+    content.append(f"{days}d {hours}h {minutes}m", style=f"bold {urgency_color}")
+
+    panel = Panel(
+        content,
+        title=f"[bold magenta]📱 {app_name}[/bold magenta]",
+        border_style=urgency_color,
+        box=box.ROUNDED,
+    )
+    console.print(panel)
+
+    json = {
+        "chat_id": telegram_chat_id,
+        "text": f"```---{telegram_msg}```",
+        "parse_mode": "Markdown",
+    }
     resp = requests.post(telegrap_api_uri, json=json)
     if resp.status_code != 200:
         logger.error(resp.text)
 
 
 def main():
+    console.print()
+    console.rule("[bold cyan]🔐 Certificate Expiration Checker[/bold cyan]", style="cyan")
+    console.print()
 
+    if not certs:
+        console.print("[yellow]⚠️  No certificates found![/yellow]")
+        return
+
+    console.print(f"[dim]Found {len(certs)} certificate(s) to process...[/dim]\n")
+
+    processed = 0
     for cert in certs:
         with open(cert, "rb") as f:
             _certificate = f.readlines()
@@ -69,6 +129,8 @@ def main():
         app_name, expiration_date = extract_app_name(_certificate)
         if not app_name:
             continue
+
+        processed += 1
 
         # Create or update calendar event
         app_info = AppCertInfo(app_name=app_name, expiration_date=expiration_date, cert_path=cert)
@@ -81,6 +143,10 @@ def main():
 
         # Send Telegram notification
         send_telegram_message(app_name, expiration_date)
+
+    console.print()
+    console.rule(f"[bold green]✨ Processed {processed} certificate(s)[/bold green]", style="green")
+    console.print()
 
 
 if __name__ == "__main__":

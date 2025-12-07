@@ -1,5 +1,50 @@
+[project]
+name = "certificate-expiration"
+version = "0.1.0"
+description = "Track iOS certificate expiration dates with Google Calendar and Telegram notifications"
+authors = [{name = "Mohit Nalavadi"}]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests",
+    "rich",
+    "google-auth",
+    "google-api-python-client",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
+    "black",
+    "isort",
+    "flake8",
+    "mypy",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
 [tool.black]
 line-length = 110
-skip-string-normalization = true
 target-version = ['py312']
-include = '\.py'
+include = '\.pyi?$'
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+
+[tool.isort]
+force_single_line = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v"
