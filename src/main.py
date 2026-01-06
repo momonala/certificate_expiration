@@ -11,12 +11,12 @@ from rich.logging import RichHandler
 from rich.panel import Panel
 from rich.text import Text
 
-from gcal import AppCertInfo
-from gcal import create_or_update_calendar_event
-from gcal import load_event_ids
-from gcal import save_event_ids
-from values import telegram_api_token
-from values import telegram_chat_id
+from src.gcal import AppCertInfo
+from src.gcal import create_or_update_calendar_event
+from src.gcal import load_event_ids
+from src.gcal import save_event_ids
+from src.values import telegram_api_token
+from src.values import telegram_chat_id
 
 # Setup rich console and logging
 console = Console()
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 telegrap_api_uri = f"https://api.telegram.org/bot{telegram_api_token}/sendMessage"
 
 certs = glob("/Users/mnalavadi/Library/Developer/Xcode/UserData/Provisioning Profiles/*mobileprovision")
-certs = glob("/Users/mohit/Library/Developer/Xcode/UserData/Provisioning Profiles/*mobileprovision")
+# certs = glob("/Users/mohit/Library/Developer/Xcode/UserData/Provisioning Profiles/*mobileprovision")
 BERLIN_TZ = ZoneInfo("Europe/Berlin")
 
 
@@ -87,7 +87,7 @@ def send_telegram_message(app_name: str, expiration_date: datetime):
 
     # Create a rich panel for display
     content = Text()
-    content.append(f"📅 Expiration: ", style="bold")
+    content.append("📅 Expiration: ", style="bold")
     content.append(f"{formatted_expiriation}\n", style="cyan")
     content.append(f"{urgency_icon} Expires in: ", style="bold")
     content.append(f"{days}d {hours}h {minutes}m", style=f"bold {urgency_color}")

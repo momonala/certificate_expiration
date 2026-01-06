@@ -1,22 +1,107 @@
-# local testing files
-/cache
-/tmp
-/prototyping
-
-# code generated/large files
-*.db
-*.ipynb
-*.mp4
-*.csv
-
-# OS generated
-.DS_Store
-.idea/
-.ipynb_checkpoints/
+# Compiled Python files
 __pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+# Package management and build artifacts
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.pytest_cache/
+.hypothesis/
+
+# Jupyter/IPython
+.ipynb_checkpoints/
+*.ipynb
+.ipython/
+.jupyter/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.dir-locals.el
+.envrc
+
+# Cache and temporary files
+.cache/
+tmp/
+temp/
+*.session
+dump.rdb
 joblib_cache/
 
-# secrets
-google_application_credentials.json
+# Coverage and testing
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+reports/
+*/.hypothesis/**
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Secrets and credentials
 values.py
+google_application_credentials.json
+*.pem
+*.key
+.env
+.env.local
+secrets/
+
+# Database files (in data directories)
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+raw_data/*.db
+raw_data/*.sqlite
+raw_data/*.sqlite3
+
+# Data directories (ignore all files within)
+data/
+raw_data/
+
+# Media files
+*.mp4
+*.mp3
+*.avi
+*.mov
+
+# Project-specific generated files
+prototyping/
+cache/
+event_cache.json
 app_calendar_events.json
+recent_locations.html
+static/*.html
+
+# Local development
+.local/
+.ipython/

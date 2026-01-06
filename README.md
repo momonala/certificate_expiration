@@ -1,5 +1,8 @@
 # Certificate Expiration Tracker
 
+[![CI](https://github.com/momonala/certificate-expiration/actions/workflows/ci.yml/badge.svg)](https://github.com/momonala/certificate-expiration/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/momonala/certificate-expiration/branch/main/graph/badge.svg)](https://codecov.io/gh/momonala/certificate-expiration)
+
 Monitors iOS provisioning profile expiration dates and sends notifications via Google Calendar and Telegram.
 
 ## Tech Stack
@@ -21,7 +24,7 @@ flowchart LR
         Telegram[Telegram Bot API]
     end
     subgraph App
-        Main[main.py]
+        Main[src/main.py]
     end
     
     Certs --> Main
@@ -70,26 +73,27 @@ flowchart LR
    telegram_chat_id = "YOUR_CHAT_ID"
    ```
 
-5. Update the certificate path in `main.py` to match your username:
+5. Update the certificate path in `src/main.py` to match your username:
    ```python
    certs = glob("/Users/YOUR_USERNAME/Library/Developer/Xcode/UserData/Provisioning Profiles/*mobileprovision")
    ```
 
-6. Update `CALENDAR_ID` in `gcal.py` to your Google Calendar email.
+6. Update `CALENDAR_ID` in `src/gcal.py` to your Google Calendar email.
 
 ## Running
 
 ```bash
-python main.py
+python -m src.main
 ```
 
 ## Project Structure
 
 ```
 certificate_expiration/
-├── main.py                              # Entry point - parses certs, sends notifications
-├── gcal.py                              # Google Calendar event creation/updates
-├── values.py                            # Telegram credentials (not committed)
+├── src/
+│   ├── main.py                          # Entry point - parses certs, sends notifications
+│   ├── gcal.py                          # Google Calendar event creation/updates
+│   └── values.py                        # Telegram credentials (not committed)
 ├── google_application_credentials.json  # GCP service account (not committed)
 ├── app_calendar_events.json             # Persisted mapping of app → calendar event ID
 └── pyproject.toml                       # Project config and dependencies
@@ -124,11 +128,11 @@ certificate_expiration/
 
 | Location | Setting | Description |
 |----------|---------|-------------|
-| `main.py` | `certs` glob path | Path to provisioning profiles directory |
-| `main.py` | `BERLIN_TZ` | Timezone for date display |
-| `main.py` | `identifier` | Provisioning profile name prefix to match |
-| `gcal.py` | `CALENDAR_ID` | Google Calendar to add events to |
-| `gcal.py` | `colorId` | Calendar event color (11 = red) |
+| `src/main.py` | `certs` glob path | Path to provisioning profiles directory |
+| `src/main.py` | `BERLIN_TZ` | Timezone for date display |
+| `src/main.py` | `identifier` | Provisioning profile name prefix to match |
+| `src/gcal.py` | `CALENDAR_ID` | Google Calendar to add events to |
+| `src/gcal.py` | `colorId` | Calendar event color (11 = red) |
 
 ## External API Dependencies
 

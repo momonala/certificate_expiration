@@ -16,12 +16,13 @@ console = Console()
 logger = logging.getLogger(__name__)
 
 # Get the directory where this script is located
-SCRIPT_DIR = Path(__file__).parent.resolve()
+SCRIPT_DIR = Path(__file__).parent.parent.resolve()
 EVENT_TRACKING_FILE = SCRIPT_DIR / "app_calendar_events.json"
 SERVICE_ACCOUNT_FILE = SCRIPT_DIR / "google_application_credentials.json"
 CALENDAR_ID = "mnalavadi@gmail.com"
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 BERLIN_TZ = ZoneInfo("Europe/Berlin")
+print(SERVICE_ACCOUNT_FILE)
 credentials = service_account.Credentials.from_service_account_file(str(SERVICE_ACCOUNT_FILE), scopes=SCOPES)
 
 
@@ -85,10 +86,10 @@ def create_or_update_calendar_event(app_info: AppCertInfo, event_id: str | None 
     try:
         if event_id:
             result = gcal_client.update(calendarId=CALENDAR_ID, eventId=event_id, body=event).execute()
-            console.print(f"  [green]✓[/green] [dim]Updated calendar event[/dim]")
+            console.print("  [green]✓[/green] [dim]Updated calendar event[/dim]")
         else:
             result = gcal_client.insert(calendarId=CALENDAR_ID, body=event).execute()
-            console.print(f"  [green]✓[/green] [dim]Created calendar event[/dim]")
+            console.print("  [green]✓[/green] [dim]Created calendar event[/dim]")
 
         return result["id"]
     except Exception as e:
